@@ -140,21 +140,24 @@ export default function Home() {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
-      if (currentScrollY < 50) {
-        setNavVisible(true);
-      } else if (currentScrollY > lastScrollY + 5) {
-        setNavVisible(false); // Scrolling down
-      } else if (currentScrollY < lastScrollY - 5) {
-        setNavVisible(true); // Scrolling up
-      }
+      // Use the previous state value for comparison
+      setLastScrollY(prev => {
+        if (currentScrollY < 50) {
+          setNavVisible(true);
+        } else if (currentScrollY > prev + 5) {
+          setNavVisible(false); // Scrolling down
+        } else if (currentScrollY < prev - 5) {
+          setNavVisible(true); // Scrolling up
+        }
+        return currentScrollY;
+      });
 
-      setLastScrollY(currentScrollY);
       setScrolled(currentScrollY > 50);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY]);
+  }, []); // Only run once on mount
 
   // Rotate hero images every 5 seconds
   useEffect(() => {
@@ -468,8 +471,9 @@ export default function Home() {
         </div>
       </nav>
 
+      <div id="home" className="absolute top-0" />
+
       <section
-        id="home"
         className="px-4 pb-4 pt-24"
       >
         <div className="relative flex h-[calc(100vh-7rem)] items-center justify-start overflow-hidden rounded-[40px]">
@@ -500,7 +504,7 @@ export default function Home() {
           </div>
 
           {/* Hero Content */}
-          <div className="relative z-10 mx-auto w-full max-w-7xl px-8 sm:px-12 lg:px-16 text-left -mt-8">
+          <div className="relative z-10 mx-auto w-full max-w-7xl px-6 sm:px-10 lg:px-12 text-left -mt-8">
             <div className="overflow-hidden">
               <h1
                 ref={heroHeadingRef}
@@ -545,7 +549,7 @@ export default function Home() {
           </div>
 
           {/* Frosted Glass Location Box */}
-          <div className="absolute bottom-8 right-8 z-20">
+          <div className="absolute bottom-12 right-12 z-20">
             <div className="rounded-2xl border border-white/20 bg-white/10 p-5 backdrop-blur-xl shadow-2xl">
               <div className="flex items-center gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--burgundy)] text-white shadow-lg">
