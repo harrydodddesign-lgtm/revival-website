@@ -241,28 +241,45 @@ html {
 
 /* Mobile responsive for service cards */
 @media (max-width: 768px) {
+  .service-card {
+    height: 400px;
+    /* Increased height to ensure room for full text */
+  }
 
-  /* Show description but keep it compact on mobile */
+  .service-card-title {
+    top: 50%;
+    left: 24px;
+    transform: translateY(-50%);
+    font-size: 26px;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
   .service-card-description {
+    opacity: 0;
+    transform: translateY(100%);
+    height: 100%;
+    padding: 32px 24px;
+    background: rgba(44, 44, 44, 0.85);
+    /* Darker for better mobile readability */
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Expanded state on mobile (mimics desktop hover) */
+  .service-card.is-expanded .service-card-title {
+    top: 24px;
+    transform: translateY(0);
+    opacity: 0;
+    /* Match desktop hover behavior where title usually moves/hides */
+    font-size: 20px;
+  }
+
+  .service-card.is-expanded .service-card-description {
     opacity: 1;
     transform: translateY(0);
-    height: 50%;
-    padding: 24px;
-    font-size: 14px;
-    background: rgba(44, 44, 44, 0.6);
   }
 
-  /* Adjust title positioning on mobile */
-  .service-card-title {
-    top: 24px;
-    left: 24px;
-    font-size: 22px;
-  }
-
-  /* Expanded state on mobile tweaks */
-  .service-card.is-expanded .service-card-description {
-    height: 60%;
-    background: rgba(125, 46, 46, 0.5);
+  .service-card.is-expanded .service-card-overlay {
+    background: rgba(125, 46, 46, 0.4);
   }
 }
 
