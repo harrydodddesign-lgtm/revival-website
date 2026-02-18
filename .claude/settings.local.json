@@ -1,0 +1,7 @@
+{
+  "enabledMcpjsonServers": [
+    "playwright",
+    "sanity"
+  ],
+  "enableAllProjectMcpServers": true
+}
