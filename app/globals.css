@@ -175,26 +175,30 @@ html {
   z-index: 5;
 }
 
-.service-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-}
+/* Desktop Hover Effects - Only apply on large screens with hover capability */
+@media (hover: hover) and (min-width: 1025px) {
+  .service-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
 
-.service-card:hover .service-card-image {
-  transform: scale(1.05);
-}
+  .service-card:hover .service-card-image {
+    transform: scale(1.05);
+  }
 
-.service-card:hover .service-card-overlay {
-  background: rgba(125, 46, 46, 0.3);
-}
+  .service-card:hover .service-card-overlay {
+    background: rgba(125, 46, 46, 0.3);
+  }
 
-.service-card:hover .service-card-title {
-  transform: translateY(-5px);
-}
+  .service-card:hover .service-card-title {
+    transform: translateY(-5px);
+    font-size: 24px;
+  }
 
-.service-card:hover .service-card-description {
-  opacity: 1;
-  transform: translateY(0);
+  .service-card:hover .service-card-description {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Gallery image hover - Handled via Tailwind group-hover in page.tsx */
@@ -289,12 +293,5 @@ html {
     left: 24px;
     /* Center-ish on extra small screens */
     width: auto;
-  }
-}
-
-/* Desktop keeps hover behavior */
-@media (min-width: 1025px) {
-  .service-card:hover .service-card-title {
-    font-size: 24px;
   }
 }
