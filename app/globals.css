@@ -281,6 +281,15 @@ html {
   .service-card.is-expanded .service-card-overlay {
     background: rgba(125, 46, 46, 0.4);
   }
+
+  /* Location Box Mobile Adjustments */
+  .absolute.bottom-8.right-8.z-20 {
+    bottom: 24px;
+    right: 24px;
+    left: 24px;
+    /* Center-ish on extra small screens */
+    width: auto;
+  }
 }
 
 /* Desktop keeps hover behavior */

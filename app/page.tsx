@@ -545,7 +545,7 @@ export default function Home() {
           </div>
 
           {/* Frosted Glass Location Box */}
-          <div className="absolute bottom-8 right-8 z-20 hidden md:block">
+          <div className="absolute bottom-8 right-8 z-20">
             <div className="rounded-2xl border border-white/20 bg-white/10 p-5 backdrop-blur-xl shadow-2xl">
               <div className="flex items-center gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--burgundy)] text-white shadow-lg">
@@ -641,7 +641,6 @@ export default function Home() {
               <div
                 key={index}
                 className={`service-card ${expandedService === index ? 'is-expanded' : ''}`}
-                onClick={() => setExpandedService(expandedService === index ? null : index)}
               >
                 <div
                   className="service-card-image"
@@ -657,7 +656,13 @@ export default function Home() {
                   </p>
                 </div>
                 {/* Plus icon indicator - Mobile only */}
-                <div className="absolute bottom-6 right-6 z-20 lg:hidden">
+                <div
+                  className="absolute bottom-6 right-6 z-20 lg:hidden"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setExpandedService(expandedService === index ? null : index);
+                  }}
+                >
                   <div className={`flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/10 backdrop-blur-sm transition-all duration-300 ${expandedService === index ? 'rotate-45' : ''}`}>
                     <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
