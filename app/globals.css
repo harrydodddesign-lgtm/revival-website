@@ -75,10 +75,7 @@ body {
   font-family: var(--font-ui), sans-serif;
 }
 
-/* Smooth scroll */
-html {
-  scroll-behavior: smooth;
-}
+
 
 /* Custom scrollbar for webkit browsers */
 ::-webkit-scrollbar {
