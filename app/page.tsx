@@ -500,7 +500,7 @@ export default function Home() {
           </div>
 
           {/* Hero Content */}
-          <div className="relative z-10 mx-auto w-full max-w-7xl text-left -mt-8">
+          <div className="relative z-10 mx-auto w-full max-w-7xl px-8 sm:px-12 lg:px-16 text-left -mt-8">
             <div className="overflow-hidden">
               <h1
                 ref={heroHeadingRef}
