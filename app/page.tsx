@@ -559,10 +559,7 @@ export default function Home() {
                   </svg>
                 </div>
                 <div>
-                  <div className="flex items-center justify-between gap-4">
-                    <p className="font-heading text-base font-bold text-white">Visit our Workshop</p>
-                    <span className="shrink-0 font-body text-[10px] uppercase tracking-widest text-emerald-400">Open Now</span>
-                  </div>
+                  <p className="font-heading text-base font-bold text-white">Visit our Workshop</p>
                   <p className="mt-0.5 font-body text-sm text-white/70">
                     30 minutes from Goodwood Motor Circuit
                   </p>
