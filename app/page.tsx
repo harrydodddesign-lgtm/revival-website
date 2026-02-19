@@ -504,7 +504,7 @@ export default function Home() {
           </div>
 
           {/* Hero Content */}
-          <div className="relative z-10 mx-auto w-full max-w-7xl px-6 sm:px-10 lg:px-12 text-left -mt-8">
+          <div className="relative z-10 mx-auto w-full max-w-7xl px-6 sm:px-10 lg:px-12 text-left lg:-mt-8">
             <div className="overflow-hidden">
               <h1
                 ref={heroHeadingRef}
@@ -549,7 +549,7 @@ export default function Home() {
           </div>
 
           {/* Frosted Glass Location Box */}
-          <div className="absolute bottom-12 right-12 z-20">
+          <div className="location-card absolute bottom-12 right-12 z-20">
             <div className="rounded-2xl border border-white/20 bg-white/10 p-5 backdrop-blur-xl shadow-2xl">
               <div className="flex items-center gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--burgundy)] text-white shadow-lg">
@@ -559,11 +559,11 @@ export default function Home() {
                   </svg>
                 </div>
                 <div>
-                  <div className="flex items-center justify-between gap-8">
+                  <div className="flex items-center justify-between gap-4">
                     <p className="font-heading text-base font-bold text-white">Visit our Workshop</p>
-                    <span className="font-body text-[10px] uppercase tracking-widest text-white/40">Open Now</span>
+                    <span className="shrink-0 font-body text-[10px] uppercase tracking-widest text-emerald-400">Open Now</span>
                   </div>
-                  <p className="mt-1 font-body text-sm text-white/70">
+                  <p className="mt-0.5 font-body text-sm text-white/70">
                     30 minutes from Goodwood Motor Circuit
                   </p>
                 </div>

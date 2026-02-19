@@ -284,11 +284,10 @@ body {
   }
 
   /* Location Box Mobile Adjustments */
-  .absolute.bottom-8.right-8.z-20 {
+  .location-card {
     bottom: 24px;
-    right: 24px;
-    left: 24px;
-    /* Center-ish on extra small screens */
+    right: 16px;
+    left: 16px;
     width: auto;
   }
 }
