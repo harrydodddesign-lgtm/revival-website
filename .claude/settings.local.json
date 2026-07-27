@@ -1,7 +1,21 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000)",
+      "Bash(lsof -i :3000 -sTCP:LISTEN)",
+      "Bash(curl *)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_take_screenshot",
+      "Bash(find / -maxdepth 6 -iname \"footer-check.png\")",
+      "Read(//Users/harrydodd/**)",
+      "mcp__playwright__browser_run_code_unsafe",
+      "mcp__playwright__browser_resize"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "playwright",
     "sanity"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }

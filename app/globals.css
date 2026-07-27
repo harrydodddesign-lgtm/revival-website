@@ -7,6 +7,7 @@
   --cream: #E8DCC4;
   --cream-light: #F5F0E8;
   --off-white: #FAFAF8;
+  --off-black: #121110;
   --charcoal: #2C2C2C;
   --grey-medium: #6B6B6B;
 
@@ -112,92 +113,6 @@ body {
   animation: fadeInUp 0.6s ease-out forwards;
 }
 
-/* Service card hover styles */
-.service-card {
-  position: relative;
-  overflow: hidden;
-  height: 400px;
-  border-radius: 40px;
-  cursor: pointer;
-  background: var(--charcoal);
-}
-
-.service-card-image {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  transition: transform 0.4s ease;
-}
-
-.service-card-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(44, 44, 44, 0.7);
-  transition: background 0.4s ease;
-}
-
-.service-card-title {
-  position: absolute;
-  top: 40px;
-  left: 40px;
-  right: 40px;
-  color: white;
-  font-size: 28px;
-  font-weight: 700;
-  text-align: left;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  z-index: 10;
-  transition: all 0.4s ease;
-}
-
-.service-card-description {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100%;
-  padding: 40px;
-  display: flex;
-  align-items: flex-end;
-  background: rgba(44, 44, 44, 0.4);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: white;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 5;
-}
-
-/* Desktop Hover Effects - Only apply on large screens with hover capability */
-@media (hover: hover) and (min-width: 1025px) {
-  .service-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  }
-
-  .service-card:hover .service-card-image {
-    transform: scale(1.05);
-  }
-
-  .service-card:hover .service-card-overlay {
-    background: rgba(125, 46, 46, 0.3);
-  }
-
-  .service-card:hover .service-card-title {
-    transform: translateY(-5px);
-    font-size: 24px;
-  }
-
-  .service-card:hover .service-card-description {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 /* Gallery image hover - Handled via Tailwind group-hover in page.tsx */
 
 /* Button hover effects */
@@ -205,7 +120,7 @@ body {
   background: var(--burgundy);
   color: white;
   border: 2px solid var(--burgundy);
-  border-radius: 8px;
+  border-radius: 6px;
   transition: all 0.3s ease;
 }
 
@@ -220,7 +135,7 @@ body {
   background: transparent;
   color: white;
   border: 2px solid white;
-  border-radius: 8px;
+  border-radius: 6px;
   transition: all 0.3s ease;
 }
 
@@ -240,50 +155,8 @@ body {
   transform: scale(1.05);
 }
 
-/* Mobile responsive for service cards */
+/* Location Box Mobile Adjustments */
 @media (max-width: 768px) {
-  .service-card {
-    height: 400px;
-    /* Increased height to ensure room for full text */
-  }
-
-  .service-card-title {
-    top: 50%;
-    left: 24px;
-    transform: translateY(-50%);
-    font-size: 26px;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .service-card-description {
-    opacity: 0;
-    transform: translateY(100%);
-    height: 100%;
-    padding: 32px 24px;
-    background: rgba(44, 44, 44, 0.85);
-    /* Darker for better mobile readability */
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  /* Expanded state on mobile (mimics desktop hover) */
-  .service-card.is-expanded .service-card-title {
-    top: 24px;
-    transform: translateY(0);
-    opacity: 0;
-    /* Match desktop hover behavior where title usually moves/hides */
-    font-size: 20px;
-  }
-
-  .service-card.is-expanded .service-card-description {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  .service-card.is-expanded .service-card-overlay {
-    background: rgba(125, 46, 46, 0.4);
-  }
-
-  /* Location Box Mobile Adjustments */
   .location-card {
     bottom: 24px;
     right: 16px;

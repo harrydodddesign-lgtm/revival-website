@@ -45,21 +45,23 @@ The main landing page with all sections:
    - Floating pill badge below hero
    - Shows proximity to Goodwood Motor Circuit
 
-4. **About Section**
-   - Company introduction and values
-   - Over 10 years experience highlighted
-
-5. **Services Section** (5 services)
+4. **Services Section** (5 services, directly after the hero)
+   - "Free comprehensive estimates provided before work begins" note under the heading
    - Servicing & Repairs
    - Welding & Fabrication
    - Electrical Diagnostics
    - Restorations
    - Motorsport Preparation
-   - Interactive cards with hover effects
+   - Numbered row layout (title / description / photo per row), not cards
 
-6. **Gallery Section**
-   - 3x3 grid of project images
+5. **Gallery Section** ("Recent Projects", directly after Services)
+   - Slightly-off-black background (`--off-black`, not pure black)
+   - Continuously looping horizontal photo slider (auto-scrolls, pauses on hover)
    - Link to Instagram
+
+6. **About Section**
+   - Company introduction and values
+   - Over 10 years experience highlighted
 
 7. **Contact Section**
    - Workshop address in Fernhurst, Haslemere
@@ -120,6 +122,14 @@ Replace the Google Maps embed URL in `app/page.tsx` (around line 469) with your 
 
 ## Recent Changes
 
+- **July 2026** (branch `home-v2`, for client review): "What Our Clients Say" now sits on a white background (was dark charcoal) with light cream cards and burgundy star ratings, matching the rest of the light sections.
+- **July 2026** (branch `home-v2`, for client review): Footer now has a heavily blurred, darkened workshop photo behind it instead of a flat background color, for a warmer feel.
+- **July 2026** (branch `home-v2`, for client review): "Recent Projects" slider is now click-and-drag (also swipeable on touch), photos are square and doubled in size, "View More on Instagram" moved to the top right in line with the paragraph, and small left/right arrow buttons were added bottom-right to click through manually.
+- **July 2026** (branch `home-v2`, for client review): Reduced corner rounding across the whole site — buttons/inputs down to 6px, and cards/images (service photos, gallery photos, testimonial cards, contact form panel, location badge) down to a consistent smaller radius.
+- **July 2026** (branch `home-v2`, for client review): "Recent Projects" moved to right after Services, redesigned as a continuously looping photo slider (pauses on hover) on a slightly-off-black background instead of a static 3x3 grid.
+- **July 2026** (branch `home-v2`, for client review): About section now on a pure white background, image runs full-bleed to the left edge of the screen (less rounded, only the right corners curve) with the text content on the right.
+- **July 2026** (branch `home-v2`, for client review): Moved Services to come right after the hero (was after About) and redesigned it as a numbered row list (eyebrow label, title, description, photo per row) instead of hover cards. Moved the "free estimates" note to sit under the "Our Services" heading instead of in a box at the bottom.
+- **July 2026** (branch `home-v2`, for client review): Major hero/nav facelift — hero photo now goes edge-to-edge (no rounded corners) and fills the full screen height, still rotating through the same photos; navigation now floats transparently over the hero (logo centered, Home/Services/Gallery on the left, Contact on the right) and turns solid once you scroll past the hero. All copy and imagery kept the same.
 - **July 2026**: Replaced the "Motorsport Preparation" and "Restorations" service card photos with real workshop shots
 - **July 2026**: Replaced the blue Morris Minor hero background photo with a yellow MG
 - **February 2026**: Initial site build

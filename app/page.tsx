@@ -91,7 +91,6 @@ export default function Home() {
   const [navVisible, setNavVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [expandedService, setExpandedService] = useState<number | null>(null);
   const [formStatus, setFormStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -130,7 +129,8 @@ export default function Home() {
   const servicesGridRef = useRef<HTMLDivElement>(null);
   const galleryHeadingRef = useRef<HTMLHeadingElement>(null);
   const gallerySubtextRef = useRef<HTMLParagraphElement>(null);
-  const galleryGridRef = useRef<HTMLDivElement>(null);
+  const galleryTrackRef = useRef<HTMLDivElement>(null);
+  const galleryDragRef = useRef({ isDown: false, startX: 0, scrollStart: 0 });
   const testimonialsHeadingRef = useRef<HTMLHeadingElement>(null);
   const testimonialsGridRef = useRef<HTMLDivElement>(null);
   const contactHeadingRef = useRef<HTMLHeadingElement>(null);
@@ -166,6 +166,72 @@ export default function Home() {
     }, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  // Gallery slider: auto-scroll that loops seamlessly, pausable by dragging
+  useEffect(() => {
+    const track = galleryTrackRef.current;
+    if (!track) return;
+
+    let loopWidth = track.scrollWidth / 2;
+    const handleResize = () => {
+      loopWidth = track.scrollWidth / 2;
+    };
+    window.addEventListener("resize", handleResize);
+
+    let rafId: number;
+    const speed = 0.6;
+    const step = () => {
+      if (!galleryDragRef.current.isDown) {
+        track.scrollLeft += speed;
+        if (track.scrollLeft >= loopWidth) {
+          track.scrollLeft -= loopWidth;
+        }
+      }
+      rafId = requestAnimationFrame(step);
+    };
+    rafId = requestAnimationFrame(step);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      cancelAnimationFrame(rafId);
+    };
+  }, []);
+
+  const handleGalleryPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    const track = galleryTrackRef.current;
+    if (!track) return;
+    galleryDragRef.current = { isDown: true, startX: e.clientX, scrollStart: track.scrollLeft };
+    track.setPointerCapture(e.pointerId);
+  };
+
+  const handleGalleryPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const track = galleryTrackRef.current;
+    const drag = galleryDragRef.current;
+    if (!track || !drag.isDown) return;
+    const loopWidth = track.scrollWidth / 2;
+    let next = drag.scrollStart - (e.clientX - drag.startX);
+    if (next < 0) next += loopWidth;
+    if (next >= loopWidth) next -= loopWidth;
+    track.scrollLeft = next;
+  };
+
+  const handleGalleryPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    const track = galleryTrackRef.current;
+    if (track) track.releasePointerCapture(e.pointerId);
+    galleryDragRef.current.isDown = false;
+  };
+
+  const handleGalleryArrowClick = (direction: 1 | -1) => {
+    const track = galleryTrackRef.current;
+    if (!track) return;
+    const card = track.firstElementChild as HTMLElement | null;
+    const step = card ? card.offsetWidth + 24 : 300;
+    const loopWidth = track.scrollWidth / 2;
+    let next = track.scrollLeft + direction * step;
+    if (next < 0) next += loopWidth;
+    if (next >= loopWidth) next -= loopWidth;
+    track.scrollLeft = next;
+  };
 
   // GSAP Animations
   useEffect(() => {
@@ -302,23 +368,6 @@ export default function Home() {
         );
       }
 
-      if (galleryGridRef.current) {
-        gsap.fromTo(
-          galleryGridRef.current.children,
-          { scale: 0.9, opacity: 0 },
-          {
-            scale: 1,
-            opacity: 1,
-            duration: 0.5,
-            stagger: 0.08,
-            scrollTrigger: {
-              trigger: galleryGridRef.current,
-              start: "top 80%",
-            }
-          }
-        );
-      }
-
       // Testimonials section
       if (testimonialsHeadingRef.current) {
         gsap.fromTo(
@@ -382,13 +431,27 @@ export default function Home() {
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${navVisible ? "translate-y-0" : "-translate-y-full"
           } ${scrolled
             ? "bg-[var(--off-white)]/95 backdrop-blur-sm shadow-sm"
-            : "bg-[var(--off-white)]"
+            : "bg-gradient-to-b from-black/50 via-black/15 to-transparent"
           }`}
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-20 items-center justify-between">
-            {/* Logo */}
-            <div className="flex items-center">
+          <div className="grid h-20 grid-cols-2 items-center md:grid-cols-3">
+            {/* Quick Links - Left */}
+            <div className="hidden items-center gap-8 md:flex">
+              {["Home", "Services", "Gallery"].map((item) => (
+                <a
+                  key={item}
+                  href={`#${item.toLowerCase()}`}
+                  className={`font-ui text-sm font-medium uppercase tracking-wider transition-colors hover:text-[var(--burgundy)] ${scrolled ? "text-[var(--charcoal)]" : "text-white"
+                    }`}
+                >
+                  {item}
+                </a>
+              ))}
+            </div>
+
+            {/* Logo - Center */}
+            <div className="flex items-center justify-start md:justify-center">
               <div className="relative h-16 w-16 overflow-hidden">
                 <Image
                   src="/logo-cropped.png"
@@ -399,48 +462,40 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex md:items-center md:gap-12">
-              <div className="flex items-center gap-8">
-                {["Home", "Services", "Gallery"].map((item) => (
-                  <a
-                    key={item}
-                    href={`#${item.toLowerCase()}`}
-                    className="font-ui text-sm font-medium uppercase tracking-wider text-[var(--charcoal)] transition-colors hover:text-[var(--burgundy)]"
-                  >
-                    {item}
-                  </a>
-                ))}
-              </div>
+            {/* Contact - Right */}
+            <div className="flex items-center justify-end gap-4">
               <a
                 href="#contact"
-                className="btn-primary rounded-[8px] px-6 py-2.5 font-ui text-xs font-bold uppercase tracking-widest shadow-sm"
+                className={`hidden font-ui text-xs font-bold uppercase tracking-widest md:inline-flex ${scrolled
+                    ? "btn-primary rounded-[6px] px-6 py-2.5 shadow-sm"
+                    : "items-center rounded-[6px] border border-white/40 px-6 py-2.5 text-white transition-colors hover:bg-white/10"
+                  }`}
               >
                 Contact
               </a>
-            </div>
 
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="flex h-10 w-10 items-center justify-center rounded-md md:hidden"
-              aria-label="Toggle menu"
-            >
-              <div className="space-y-1.5">
-                <span
-                  className={`block h-0.5 w-6 bg-[var(--charcoal)] transition-transform ${mobileMenuOpen ? "translate-y-2 rotate-45" : ""
-                    }`}
-                />
-                <span
-                  className={`block h-0.5 w-6 bg-[var(--charcoal)] transition-opacity ${mobileMenuOpen ? "opacity-0" : ""
-                    }`}
-                />
-                <span
-                  className={`block h-0.5 w-6 bg-[var(--charcoal)] transition-transform ${mobileMenuOpen ? "-translate-y-2 -rotate-45" : ""
-                    }`}
-                />
-              </div>
-            </button>
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="flex h-10 w-10 items-center justify-center rounded-md md:hidden"
+                aria-label="Toggle menu"
+              >
+                <div className="space-y-1.5">
+                  <span
+                    className={`block h-0.5 w-6 transition-transform ${scrolled ? "bg-[var(--charcoal)]" : "bg-white"} ${mobileMenuOpen ? "translate-y-2 rotate-45" : ""
+                      }`}
+                  />
+                  <span
+                    className={`block h-0.5 w-6 transition-opacity ${scrolled ? "bg-[var(--charcoal)]" : "bg-white"} ${mobileMenuOpen ? "opacity-0" : ""
+                      }`}
+                  />
+                  <span
+                    className={`block h-0.5 w-6 transition-transform ${scrolled ? "bg-[var(--charcoal)]" : "bg-white"} ${mobileMenuOpen ? "-translate-y-2 -rotate-45" : ""
+                      }`}
+                  />
+                </div>
+              </button>
+            </div>
           </div>
 
           {/* Mobile Menu */}
@@ -448,13 +503,13 @@ export default function Home() {
             className={`overflow-hidden transition-all duration-300 md:hidden ${mobileMenuOpen ? "max-h-80 pb-6" : "max-h-0"
               }`}
           >
-            <div className="flex flex-col gap-6 pt-4">
+            <div className={`flex flex-col gap-6 rounded-lg p-6 pt-6 ${scrolled ? "" : "bg-black/40 backdrop-blur-md"}`}>
               {["Home", "Services", "Gallery"].map((item) => (
                 <a
                   key={item}
                   href={`#${item.toLowerCase()}`}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="font-ui text-sm font-medium uppercase tracking-wider text-[var(--charcoal)]"
+                  className={`font-ui text-sm font-medium uppercase tracking-wider ${scrolled ? "text-[var(--charcoal)]" : "text-white"}`}
                 >
                   {item}
                 </a>
@@ -462,7 +517,7 @@ export default function Home() {
               <a
                 href="#contact"
                 onClick={() => setMobileMenuOpen(false)}
-                className="btn-primary inline-block w-fit rounded-[8px] px-6 py-3 font-ui text-xs font-bold uppercase tracking-widest"
+                className="btn-primary inline-block w-fit rounded-[6px] px-6 py-3 font-ui text-xs font-bold uppercase tracking-widest"
               >
                 Contact
               </a>
@@ -473,10 +528,8 @@ export default function Home() {
 
       <div id="home" className="absolute top-0" />
 
-      <section
-        className="px-4 pb-4 pt-24"
-      >
-        <div className="relative flex h-[calc(100vh-7rem)] items-center justify-start overflow-hidden rounded-[40px]">
+      <section className="relative">
+        <div className="relative flex h-screen items-center justify-center overflow-hidden">
           {/* Background Images with Rotation */}
           <div className="absolute inset-0">
             {heroImages.map((image, index) => (
@@ -498,17 +551,17 @@ export default function Home() {
               className="absolute inset-0"
               style={{
                 background:
-                  "linear-gradient(90deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 40%, rgba(0,0,0,0) 100%), radial-gradient(circle at bottom right, rgba(0,0,0,0.7) 0%, transparent 60%)",
+                  "linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.35) 35%, rgba(0,0,0,0.55) 70%, rgba(0,0,0,0.75) 100%), radial-gradient(circle at bottom right, rgba(0,0,0,0.7) 0%, transparent 60%)",
               }}
             />
           </div>
 
           {/* Hero Content */}
-          <div className="relative z-10 mx-auto w-full max-w-7xl px-6 sm:px-10 lg:px-12 text-left lg:-mt-8">
+          <div className="relative z-10 mx-auto w-full max-w-7xl px-6 sm:px-10 lg:px-12 text-center">
             <div className="overflow-hidden">
               <h1
                 ref={heroHeadingRef}
-                className="pb-2 font-heading text-4xl font-bold leading-[1.1] text-white sm:text-5xl md:text-6xl lg:text-8xl max-w-4xl"
+                className="mx-auto pb-2 font-heading text-4xl font-bold leading-[1.1] text-white sm:text-5xl md:text-6xl lg:text-8xl max-w-4xl"
               >
                 Classic & Vintage Specialists.
               </h1>
@@ -516,18 +569,18 @@ export default function Home() {
             <div className="overflow-hidden">
               <p
                 ref={heroSubtextRef}
-                className="mt-6 max-w-xl font-body text-lg text-white/90 sm:text-xl"
+                className="mx-auto mt-6 max-w-xl font-body text-lg text-white/90 sm:text-xl"
               >
                 Expert servicing, restoration, and motorsport preparation in the heart of Surrey.
               </p>
             </div>
             <div
               ref={heroButtonsRef}
-              className="mt-10 flex flex-col items-start justify-start gap-8 sm:flex-row sm:items-center"
+              className="mt-10 flex flex-col items-center justify-center gap-8 sm:flex-row"
             >
               <a
                 href="#contact"
-                className="btn-primary inline-flex items-center rounded-[8px] px-8 py-4 font-ui text-sm font-semibold uppercase tracking-wider"
+                className="btn-primary inline-flex items-center rounded-[6px] px-8 py-4 font-ui text-sm font-semibold uppercase tracking-wider"
               >
                 Get a Quote
               </a>
@@ -550,9 +603,9 @@ export default function Home() {
 
           {/* Frosted Glass Location Box */}
           <div className="location-card absolute bottom-12 right-12 z-20">
-            <div className="rounded-2xl border border-white/20 bg-white/10 p-5 backdrop-blur-xl shadow-2xl">
+            <div className="rounded-lg border border-white/20 bg-white/10 p-5 backdrop-blur-xl shadow-2xl">
               <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--burgundy)] text-white shadow-lg">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[var(--burgundy)] text-white shadow-lg">
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -571,60 +624,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* About Section */}
-      <section className="relative overflow-hidden bg-[var(--off-white)] py-28">
-        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2 lg:gap-24">
-            {/* Left Column - Image */}
-            <div className="relative aspect-square overflow-hidden rounded-[40px] shadow-xl">
-              <Image
-                src="/projects/engine-bay-2.jpeg"
-                alt="Classic vehicle restoration in progress at Revival Motorworks"
-                fill
-                className="object-cover"
-              />
-            </div>
-
-            {/* Right Column - Content */}
-            <div className="text-left">
-              <div className="overflow-hidden">
-                <h2
-                  ref={aboutHeadingRef}
-                  className="font-heading text-3xl font-bold leading-tight text-[var(--charcoal)] sm:text-4xl md:text-5xl"
-                >
-                  Traditional Craftsmanship,<br />Modern Expertise
-                </h2>
-              </div>
-              <p
-                ref={aboutTextRef}
-                className="mt-8 font-body text-lg leading-relaxed text-[var(--grey-medium)]"
-              >
-                We&apos;re a dedicated mechanical workshop on the Surrey-West Sussex
-                border, specialising in classic, vintage, and modern vehicle care.
-                With over 10 years of experience and a genuine passion for
-                automotive excellence, we combine time-honoured craftsmanship with
-                cutting-edge diagnostic tools. Whether you&apos;re a classic car
-                enthusiast or an everyday driver, we deliver reliable, high-quality
-                solutions with meticulous attention to detail.
-              </p>
-
-              <div className="mt-10">
-                <a
-                  href="#services"
-                  className="btn-primary inline-flex items-center rounded-[8px] px-8 py-4 font-ui text-sm font-semibold uppercase tracking-wider"
-                >
-                  Explore Our Services
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Services Section */}
       <section
         id="services"
-        className="bg-grid-industrial bg-[var(--cream-light)] py-28"
+        className="bg-white py-28"
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="overflow-hidden text-left">
@@ -635,52 +638,35 @@ export default function Home() {
               Our Services
             </h2>
           </div>
+          <p className="mt-6 max-w-2xl text-left font-body text-lg text-[var(--grey-medium)]">
+            Free comprehensive estimates provided before work begins.
+          </p>
 
-          {/* Services Grid */}
-          <div ref={servicesGridRef} className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Services Rows */}
+          <div ref={servicesGridRef} className="mt-16">
             {services.map((service, index) => (
               <div
                 key={index}
-                className={`service-card ${expandedService === index ? 'is-expanded' : ''}`}
+                className="border-t border-[var(--charcoal)]/15 py-10"
               >
-                <div
-                  className="service-card-image"
-                  style={{ backgroundImage: `url(${service.image})` }}
-                />
-                <div className="service-card-overlay" />
-                <div className="service-card-title font-heading">
-                  {service.title}
-                </div>
-                <div className="service-card-description">
-                  <p className="font-body text-base leading-relaxed">
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-start lg:gap-10">
+                  <h3 className="font-heading text-2xl font-bold leading-tight text-[var(--charcoal)] sm:text-3xl lg:col-span-4">
+                    {service.title}
+                  </h3>
+                  <p className="font-body text-base leading-relaxed text-[var(--grey-medium)] lg:col-span-4">
                     {service.description}
                   </p>
-                </div>
-                {/* Plus icon indicator - Mobile only */}
-                <div
-                  className="absolute bottom-6 right-6 z-20 lg:hidden"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setExpandedService(expandedService === index ? null : index);
-                  }}
-                >
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/10 backdrop-blur-sm transition-all duration-300 ${expandedService === index ? 'rotate-45' : ''}`}>
-                    <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-lg lg:col-span-4">
+                    <Image
+                      src={service.image}
+                      alt={service.title}
+                      fill
+                      className="object-cover"
+                    />
                   </div>
                 </div>
               </div>
             ))}
-          </div>
-
-          {/* Estimate Notice */}
-          <div className="mt-12 flex justify-center">
-            <div className="rounded bg-white px-6 py-4 shadow-sm">
-              <span className="font-body text-sm text-[var(--charcoal)] sm:text-base">
-                Free comprehensive estimates provided before work begins
-              </span>
-            </div>
           </div>
         </div>
       </section>
@@ -688,66 +674,152 @@ export default function Home() {
       {/* Gallery Section */}
       <section
         id="gallery"
-        className="bg-[var(--off-white)] py-28"
+        className="overflow-hidden bg-[var(--off-black)] py-28"
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="overflow-hidden text-left">
-            <h2
-              ref={galleryHeadingRef}
-              className="font-heading text-3xl font-bold text-[var(--charcoal)] sm:text-4xl md:text-5xl"
-            >
-              Recent Projects
-            </h2>
-          </div>
-          <p
-            ref={gallerySubtextRef}
-            className="mt-6 max-w-2xl text-left font-body text-lg text-[var(--grey-medium)]"
-          >
-            A selection of our recent work showcasing restorations, fabrication,
-            engine rebuilds, and motorsport preparation.
-          </p>
-
-          {/* Gallery Grid */}
-          <div ref={galleryGridRef} className="mt-12 grid grid-cols-2 gap-6 sm:grid-cols-3">
-            {galleryImages.map((image, index) => (
-              <div
-                key={index}
-                className="group relative aspect-square isolate overflow-hidden rounded-[40px] shadow-sm transition-all duration-500 hover:scale-[1.02] hover:shadow-xl"
-              >
-                <Image
-                  src={image}
-                  alt={`Project ${index + 1}`}
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
-                />
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <div className="overflow-hidden">
+                <h2
+                  ref={galleryHeadingRef}
+                  className="font-heading text-3xl font-bold text-[var(--cream-light)] sm:text-4xl md:text-5xl"
+                >
+                  Recent Projects
+                </h2>
               </div>
-            ))}
-          </div>
+              <p
+                ref={gallerySubtextRef}
+                className="mt-6 max-w-2xl text-left font-body text-lg text-[var(--cream-light)]/70"
+              >
+                A selection of our recent work showcasing restorations, fabrication,
+                engine rebuilds, and motorsport preparation.
+              </p>
+            </div>
 
-          {/* Instagram Button */}
-          <div className="mt-16 text-left">
+            {/* Instagram Link */}
             <a
               href="https://instagram.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-primary inline-flex items-center gap-3 rounded-[8px] px-8 py-4 font-ui text-sm font-semibold uppercase tracking-wider"
+              className="group inline-flex shrink-0 items-center gap-3"
             >
-              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-              </svg>
-              View More on Instagram
+              <span className="flex h-10 w-10 items-center justify-center rounded-[6px] bg-[var(--burgundy)] text-white transition-transform group-hover:scale-105">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17L17 7M17 7H8M17 7v9" />
+                </svg>
+              </span>
+              <span className="font-heading text-lg text-[var(--cream-light)]">View More on Instagram</span>
             </a>
+          </div>
+        </div>
+
+        {/* Looping Gallery Slider - drag to slide through */}
+        <div
+          ref={galleryTrackRef}
+          onPointerDown={handleGalleryPointerDown}
+          onPointerMove={handleGalleryPointerMove}
+          onPointerUp={handleGalleryPointerUp}
+          onPointerLeave={handleGalleryPointerUp}
+          className="mt-12 flex w-full touch-pan-y cursor-grab select-none gap-6 overflow-x-hidden px-4 active:cursor-grabbing sm:px-6 lg:px-8"
+        >
+          {[...galleryImages, ...galleryImages].map((image, index) => (
+            <div
+              key={index}
+              className="group relative aspect-square h-[32rem] w-[32rem] shrink-0 overflow-hidden rounded-lg shadow-lg sm:h-[40rem] sm:w-[40rem]"
+            >
+              <Image
+                src={image}
+                alt={`Project ${(index % galleryImages.length) + 1}`}
+                fill
+                draggable={false}
+                className="pointer-events-none object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Slider Arrow Controls */}
+        <div className="mx-auto mt-8 flex max-w-7xl justify-end px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => handleGalleryArrowClick(-1)}
+              aria-label="Previous project"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/5 text-white backdrop-blur-sm transition-colors hover:bg-white/10"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleGalleryArrowClick(1)}
+              aria-label="Next project"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/5 text-white backdrop-blur-sm transition-colors hover:bg-white/10"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section className="relative overflow-hidden bg-white py-28">
+        <div className="grid grid-cols-1 lg:grid-cols-2 lg:items-center">
+          {/* Left Column - Image (full-bleed to screen edge) */}
+          <div className="relative aspect-[4/3] overflow-hidden rounded-none shadow-xl lg:aspect-auto lg:h-[600px] lg:rounded-r-2xl">
+            <Image
+              src="/projects/engine-bay-2.jpeg"
+              alt="Classic vehicle restoration in progress at Revival Motorworks"
+              fill
+              className="object-cover"
+            />
+          </div>
+
+          {/* Right Column - Content */}
+          <div className="px-4 pt-12 text-left sm:px-6 lg:px-0 lg:pl-16 lg:pr-12 lg:pt-0 xl:pl-24">
+            <div className="overflow-hidden">
+              <h2
+                ref={aboutHeadingRef}
+                className="font-heading text-3xl font-bold leading-tight text-[var(--charcoal)] sm:text-4xl md:text-5xl"
+              >
+                Traditional Craftsmanship,<br />Modern Expertise
+              </h2>
+            </div>
+            <p
+              ref={aboutTextRef}
+              className="mt-8 font-body text-lg leading-relaxed text-[var(--grey-medium)]"
+            >
+              We&apos;re a dedicated mechanical workshop on the Surrey-West Sussex
+              border, specialising in classic, vintage, and modern vehicle care.
+              With over 10 years of experience and a genuine passion for
+              automotive excellence, we combine time-honoured craftsmanship with
+              cutting-edge diagnostic tools. Whether you&apos;re a classic car
+              enthusiast or an everyday driver, we deliver reliable, high-quality
+              solutions with meticulous attention to detail.
+            </p>
+
+            <div className="mt-10">
+              <a
+                href="#services"
+                className="btn-primary inline-flex items-center rounded-[6px] px-8 py-4 font-ui text-sm font-semibold uppercase tracking-wider"
+              >
+                Explore Our Services
+              </a>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Testimonials Section */}
-      <section className="bg-[var(--charcoal)] py-28">
+      <section className="bg-white py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="overflow-hidden text-left">
             <h2
               ref={testimonialsHeadingRef}
-              className="font-heading text-3xl font-bold text-[var(--cream-light)] sm:text-4xl md:text-5xl"
+              className="font-heading text-3xl font-bold text-[var(--charcoal)] sm:text-4xl md:text-5xl"
             >
               What Our Clients Say
             </h2>
@@ -757,23 +829,23 @@ export default function Home() {
             {testimonials.map((testimonial, index) => (
               <div
                 key={index}
-                className="rounded-[40px] border border-[var(--cream)]/10 bg-[var(--charcoal)] p-10 transition-colors hover:border-[var(--cream)]/20 shadow-xl"
+                className="rounded-lg border border-[var(--charcoal)]/10 bg-[var(--cream-light)] p-10 transition-colors hover:border-[var(--burgundy)]/30 shadow-sm"
               >
-                <div className="flex gap-1 text-[var(--cream)]">
+                <div className="flex gap-1 text-[var(--burgundy)]">
                   {[...Array(5)].map((_, i) => (
                     <svg key={i} className="h-5 w-5 fill-current" viewBox="0 0 20 20">
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                   ))}
                 </div>
-                <p className="mt-4 font-body text-base leading-relaxed text-[var(--cream-light)]/80">
+                <p className="mt-4 font-body text-base leading-relaxed text-[var(--charcoal)]/80">
                   &ldquo;{testimonial.quote}&rdquo;
                 </p>
                 <div className="mt-6">
-                  <p className="font-heading text-lg font-semibold text-[var(--cream-light)]">
+                  <p className="font-heading text-lg font-semibold text-[var(--charcoal)]">
                     {testimonial.name}
                   </p>
-                  <p className="font-body text-sm text-[var(--cream-light)]/60">
+                  <p className="font-body text-sm text-[var(--grey-medium)]">
                     {testimonial.vehicle}
                   </p>
                 </div>
@@ -786,6 +858,17 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="relative overflow-hidden bg-[var(--charcoal)] px-4 py-16">
+        {/* Blurred Background Photo */}
+        <div className="absolute inset-0">
+          <Image
+            src="/projects/engine-block-spray.jpeg"
+            alt=""
+            fill
+            className="scale-110 object-cover opacity-70 blur-2xl"
+          />
+          <div className="absolute inset-0 bg-black/40" />
+        </div>
+
         <div className="relative z-10 mx-auto max-w-7xl">
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-24">
             {/* Left Column - Info & Social */}
@@ -861,9 +944,9 @@ export default function Home() {
                     </p>
                   </div>
 
-                  <div className="mt-8 rounded-2xl border border-white/20 bg-white/10 p-6 backdrop-blur-xl shadow-2xl">
+                  <div className="mt-8 rounded-lg border border-white/20 bg-white/10 p-6 backdrop-blur-xl shadow-2xl">
                     <div className="flex items-start gap-4">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[var(--burgundy)] text-white shadow-lg">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--burgundy)] text-white shadow-lg">
                         <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
@@ -913,7 +996,7 @@ export default function Home() {
               </p>
 
               {formStatus === "success" ? (
-                <div className="mt-8 rounded-[40px] border border-white/20 bg-white/5 p-12 text-center backdrop-blur-sm animate-fade-in-up">
+                <div className="mt-8 rounded-lg border border-white/20 bg-white/5 p-12 text-center backdrop-blur-sm animate-fade-in-up">
                   <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[var(--burgundy)] text-white shadow-lg">
                     <svg className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -938,33 +1021,33 @@ export default function Home() {
                       name="name"
                       type="text"
                       placeholder="Your Name"
-                      className="w-full rounded-[8px] border border-[var(--cream-light)]/20 bg-white/5 px-4 py-3 font-body text-[var(--cream-light)] placeholder:text-[var(--cream-light)]/40 focus:border-[var(--burgundy)] focus:outline-none focus:ring-1 focus:ring-[var(--burgundy)]"
+                      className="w-full rounded-[6px] border border-[var(--cream-light)]/20 bg-white/5 px-4 py-3 font-body text-[var(--cream-light)] placeholder:text-[var(--cream-light)]/40 focus:border-[var(--burgundy)] focus:outline-none focus:ring-1 focus:ring-[var(--burgundy)]"
                     />
                     <input
                       required
                       name="email"
                       type="email"
                       placeholder="Your Email"
-                      className="w-full rounded-[8px] border border-[var(--cream-light)]/20 bg-white/5 px-4 py-3 font-body text-[var(--cream-light)] placeholder:text-[var(--cream-light)]/40 focus:border-[var(--burgundy)] focus:outline-none focus:ring-1 focus:ring-[var(--burgundy)]"
+                      className="w-full rounded-[6px] border border-[var(--cream-light)]/20 bg-white/5 px-4 py-3 font-body text-[var(--cream-light)] placeholder:text-[var(--cream-light)]/40 focus:border-[var(--burgundy)] focus:outline-none focus:ring-1 focus:ring-[var(--burgundy)]"
                     />
                   </div>
                   <input
                     name="phone"
                     type="tel"
                     placeholder="Your Phone (optional)"
-                    className="w-full rounded-[8px] border border-[var(--cream-light)]/20 bg-white/5 px-4 py-3 font-body text-[var(--cream-light)] placeholder:text-[var(--cream-light)]/40 focus:border-[var(--burgundy)] focus:outline-none focus:ring-1 focus:ring-[var(--burgundy)]"
+                    className="w-full rounded-[6px] border border-[var(--cream-light)]/20 bg-white/5 px-4 py-3 font-body text-[var(--cream-light)] placeholder:text-[var(--cream-light)]/40 focus:border-[var(--burgundy)] focus:outline-none focus:ring-1 focus:ring-[var(--burgundy)]"
                   />
                   <textarea
                     required
                     name="message"
                     placeholder="Tell us about your vehicle and what you need..."
                     rows={4}
-                    className="w-full resize-none rounded-[8px] border border-[var(--cream-light)]/20 bg-white/5 px-4 py-3 font-body text-[var(--cream-light)] placeholder:text-[var(--cream-light)]/40 focus:border-[var(--burgundy)] focus:outline-none focus:ring-1 focus:ring-[var(--burgundy)]"
+                    className="w-full resize-none rounded-[6px] border border-[var(--cream-light)]/20 bg-white/5 px-4 py-3 font-body text-[var(--cream-light)] placeholder:text-[var(--cream-light)]/40 focus:border-[var(--burgundy)] focus:outline-none focus:ring-1 focus:ring-[var(--burgundy)]"
                   />
                   <button
                     disabled={formStatus === "submitting"}
                     type="submit"
-                    className="btn-primary w-full rounded-[8px] px-6 py-4 font-ui text-sm font-semibold uppercase tracking-wider transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="btn-primary w-full rounded-[6px] px-6 py-4 font-ui text-sm font-semibold uppercase tracking-wider transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {formStatus === "submitting" ? (
                       <span className="flex items-center justify-center gap-2">
