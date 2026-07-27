@@ -12,7 +12,7 @@ if (typeof window !== "undefined") {
 
 // Hero background images for rotation
 const heroImages = [
-  "/projects/hero1.jpeg",
+  "/projects/hero-mg.jpeg",
   "/projects/hero-2.jpeg",
   "/projects/hero-3.jpeg",
   "/projects/hero4.jpeg",
@@ -39,12 +39,12 @@ const services = [
   {
     title: "Restorations",
     description: "Partial or full restorations undertaken with meticulous care and respect for originality.",
-    image: "/projects/full-under-car-paint.jpeg",
+    image: "/projects/restorations.jpeg",
   },
   {
     title: "Motorsport Preparation",
     description: "Fast road, track day, and rally prep—from weekend warriors to full race builds.",
-    image: "/projects/engine-work.jpeg",
+    image: "/projects/motorsport-prep.jpeg",
   },
 ];
 

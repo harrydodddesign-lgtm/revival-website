@@ -120,6 +120,8 @@ Replace the Google Maps embed URL in `app/page.tsx` (around line 469) with your 
 
 ## Recent Changes
 
+- **July 2026**: Replaced the "Motorsport Preparation" and "Restorations" service card photos with real workshop shots
+- **July 2026**: Replaced the blue Morris Minor hero background photo with a yellow MG
 - **February 2026**: Initial site build
   - Created complete single-page landing site
   - Added all 8 sections as specified
