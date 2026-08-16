@@ -122,6 +122,7 @@ Replace the Google Maps embed URL in `app/page.tsx` (around line 469) with your 
 
 ## Recent Changes
 
+- **August 2026** (branch `home-v2`, for client review): "Recent Projects" photo slider now glides smoothly to the next photo when you click the left/right arrows, instead of jumping there instantly. The Opening Hours card in the footer was moved from the left info column to sit right above the contact form, so it's the first thing you see before filling it in.
 - **July 2026** (branch `home-v2`, for client review): "What Our Clients Say" now sits on a white background (was dark charcoal) with light cream cards and burgundy star ratings, matching the rest of the light sections.
 - **July 2026** (branch `home-v2`, for client review): Footer now has a heavily blurred, darkened workshop photo behind it instead of a flat background color, for a warmer feel.
 - **July 2026** (branch `home-v2`, for client review): "Recent Projects" slider is now click-and-drag (also swipeable on touch), photos are square and doubled in size, "View More on Instagram" moved to the top right in line with the paragraph, and small left/right arrow buttons were added bottom-right to click through manually.

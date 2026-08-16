@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useLoopSlider } from "@/hooks/useLoopSlider";
 
 // Register GSAP plugins
 if (typeof window !== "undefined") {
@@ -129,10 +130,9 @@ export default function Home() {
   const servicesGridRef = useRef<HTMLDivElement>(null);
   const galleryHeadingRef = useRef<HTMLHeadingElement>(null);
   const gallerySubtextRef = useRef<HTMLParagraphElement>(null);
-  const galleryTrackRef = useRef<HTMLDivElement>(null);
-  const galleryDragRef = useRef({ isDown: false, startX: 0, scrollStart: 0 });
+  const gallerySlider = useLoopSlider();
   const testimonialsHeadingRef = useRef<HTMLHeadingElement>(null);
-  const testimonialsGridRef = useRef<HTMLDivElement>(null);
+  const testimonialsSlider = useLoopSlider();
   const contactHeadingRef = useRef<HTMLHeadingElement>(null);
 
   // Auto-hiding navigation on scroll
@@ -166,72 +166,6 @@ export default function Home() {
     }, 5000);
     return () => clearInterval(interval);
   }, []);
-
-  // Gallery slider: auto-scroll that loops seamlessly, pausable by dragging
-  useEffect(() => {
-    const track = galleryTrackRef.current;
-    if (!track) return;
-
-    let loopWidth = track.scrollWidth / 2;
-    const handleResize = () => {
-      loopWidth = track.scrollWidth / 2;
-    };
-    window.addEventListener("resize", handleResize);
-
-    let rafId: number;
-    const speed = 0.6;
-    const step = () => {
-      if (!galleryDragRef.current.isDown) {
-        track.scrollLeft += speed;
-        if (track.scrollLeft >= loopWidth) {
-          track.scrollLeft -= loopWidth;
-        }
-      }
-      rafId = requestAnimationFrame(step);
-    };
-    rafId = requestAnimationFrame(step);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      cancelAnimationFrame(rafId);
-    };
-  }, []);
-
-  const handleGalleryPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    const track = galleryTrackRef.current;
-    if (!track) return;
-    galleryDragRef.current = { isDown: true, startX: e.clientX, scrollStart: track.scrollLeft };
-    track.setPointerCapture(e.pointerId);
-  };
-
-  const handleGalleryPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const track = galleryTrackRef.current;
-    const drag = galleryDragRef.current;
-    if (!track || !drag.isDown) return;
-    const loopWidth = track.scrollWidth / 2;
-    let next = drag.scrollStart - (e.clientX - drag.startX);
-    if (next < 0) next += loopWidth;
-    if (next >= loopWidth) next -= loopWidth;
-    track.scrollLeft = next;
-  };
-
-  const handleGalleryPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    const track = galleryTrackRef.current;
-    if (track) track.releasePointerCapture(e.pointerId);
-    galleryDragRef.current.isDown = false;
-  };
-
-  const handleGalleryArrowClick = (direction: 1 | -1) => {
-    const track = galleryTrackRef.current;
-    if (!track) return;
-    const card = track.firstElementChild as HTMLElement | null;
-    const step = card ? card.offsetWidth + 24 : 300;
-    const loopWidth = track.scrollWidth / 2;
-    let next = track.scrollLeft + direction * step;
-    if (next < 0) next += loopWidth;
-    if (next >= loopWidth) next -= loopWidth;
-    track.scrollLeft = next;
-  };
 
   // GSAP Animations
   useEffect(() => {
@@ -385,22 +319,6 @@ export default function Home() {
         );
       }
 
-      if (testimonialsGridRef.current) {
-        gsap.fromTo(
-          testimonialsGridRef.current.children,
-          { y: 50, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.6,
-            stagger: 0.15,
-            scrollTrigger: {
-              trigger: testimonialsGridRef.current,
-              start: "top 80%",
-            }
-          }
-        );
-      }
 
       // Contact section
       if (contactHeadingRef.current) {
@@ -715,11 +633,11 @@ export default function Home() {
 
         {/* Looping Gallery Slider - drag to slide through */}
         <div
-          ref={galleryTrackRef}
-          onPointerDown={handleGalleryPointerDown}
-          onPointerMove={handleGalleryPointerMove}
-          onPointerUp={handleGalleryPointerUp}
-          onPointerLeave={handleGalleryPointerUp}
+          ref={gallerySlider.trackRef}
+          onPointerDown={gallerySlider.handlePointerDown}
+          onPointerMove={gallerySlider.handlePointerMove}
+          onPointerUp={gallerySlider.handlePointerUp}
+          onPointerLeave={gallerySlider.handlePointerUp}
           className="mt-12 flex w-full touch-pan-y cursor-grab select-none gap-6 overflow-x-hidden px-4 active:cursor-grabbing sm:px-6 lg:px-8"
         >
           {[...galleryImages, ...galleryImages].map((image, index) => (
@@ -743,7 +661,7 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={() => handleGalleryArrowClick(-1)}
+              onClick={() => gallerySlider.handleArrowClick(-1)}
               aria-label="Previous project"
               className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/5 text-white backdrop-blur-sm transition-colors hover:bg-white/10"
             >
@@ -753,7 +671,7 @@ export default function Home() {
             </button>
             <button
               type="button"
-              onClick={() => handleGalleryArrowClick(1)}
+              onClick={() => gallerySlider.handleArrowClick(1)}
               aria-label="Next project"
               className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/5 text-white backdrop-blur-sm transition-colors hover:bg-white/10"
             >
@@ -824,33 +742,67 @@ export default function Home() {
               What Our Clients Say
             </h2>
           </div>
+        </div>
 
-          <div ref={testimonialsGridRef} className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {testimonials.map((testimonial, index) => (
-              <div
-                key={index}
-                className="rounded-lg border border-[var(--charcoal)]/10 bg-[var(--cream-light)] p-10 transition-colors hover:border-[var(--burgundy)]/30 shadow-sm"
-              >
-                <div className="flex gap-1 text-[var(--burgundy)]">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="h-5 w-5 fill-current" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-                <p className="mt-4 font-body text-base leading-relaxed text-[var(--charcoal)]/80">
-                  &ldquo;{testimonial.quote}&rdquo;
-                </p>
-                <div className="mt-6">
-                  <p className="font-heading text-lg font-semibold text-[var(--charcoal)]">
-                    {testimonial.name}
-                  </p>
-                  <p className="font-body text-sm text-[var(--grey-medium)]">
-                    {testimonial.vehicle}
-                  </p>
-                </div>
+        {/* Looping Testimonials Slider - drag to slide through */}
+        <div
+          ref={testimonialsSlider.trackRef}
+          onPointerDown={testimonialsSlider.handlePointerDown}
+          onPointerMove={testimonialsSlider.handlePointerMove}
+          onPointerUp={testimonialsSlider.handlePointerUp}
+          onPointerLeave={testimonialsSlider.handlePointerUp}
+          className="mt-16 flex w-full touch-pan-y cursor-grab select-none gap-8 overflow-x-hidden px-4 active:cursor-grabbing sm:px-6 lg:px-8"
+        >
+          {[...testimonials, ...testimonials].map((testimonial, index) => (
+            <div
+              key={index}
+              className="flex h-[26rem] w-[22rem] shrink-0 flex-col rounded-lg border border-[var(--charcoal)]/10 bg-[var(--cream-light)] p-10 shadow-sm transition-colors hover:border-[var(--burgundy)]/30 sm:h-[28rem] sm:w-[26rem] sm:p-12 md:w-[30rem]"
+            >
+              <div className="flex gap-1 text-[var(--burgundy)]">
+                {[...Array(5)].map((_, i) => (
+                  <svg key={i} className="h-6 w-6 fill-current" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
               </div>
-            ))}
+              <p className="mt-8 font-body text-lg leading-relaxed text-[var(--charcoal)]/80">
+                &ldquo;{testimonial.quote}&rdquo;
+              </p>
+              <div className="mt-auto border-t border-[var(--charcoal)]/10 pt-6">
+                <p className="font-heading text-lg font-semibold text-[var(--charcoal)]">
+                  {testimonial.name}
+                </p>
+                <p className="font-body text-sm text-[var(--grey-medium)]">
+                  {testimonial.vehicle}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Slider Arrow Controls */}
+        <div className="mx-auto mt-8 flex max-w-7xl justify-end px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => testimonialsSlider.handleArrowClick(-1)}
+              aria-label="Previous testimonial"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--charcoal)]/15 bg-white text-[var(--charcoal)] shadow-sm transition-colors hover:border-[var(--burgundy)]/40 hover:text-[var(--burgundy)]"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => testimonialsSlider.handleArrowClick(1)}
+              aria-label="Next testimonial"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--charcoal)]/15 bg-white text-[var(--charcoal)] shadow-sm transition-colors hover:border-[var(--burgundy)]/40 hover:text-[var(--burgundy)]"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
           </div>
         </div>
       </section>
@@ -943,36 +895,6 @@ export default function Home() {
                       </a>
                     </p>
                   </div>
-
-                  <div className="mt-8 rounded-lg border border-white/20 bg-white/10 p-6 backdrop-blur-xl shadow-2xl">
-                    <div className="flex items-start gap-4">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--burgundy)] text-white shadow-lg">
-                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                      <div className="grow">
-                        <div className="flex items-center justify-between gap-4">
-                          <h4 className="font-heading text-lg font-bold text-white">Opening Hours</h4>
-                          <span className="font-body text-[10px] uppercase tracking-widest text-white/40">Verified</span>
-                        </div>
-                        <div className="mt-4 space-y-3 font-body text-sm font-medium">
-                          <div className="flex justify-between border-b border-white/10 pb-2">
-                            <span className="text-white/60">Mon – Thu</span>
-                            <span className="text-white">9am – 6pm</span>
-                          </div>
-                          <div className="flex justify-between border-b border-white/10 pb-2">
-                            <span className="text-white/60">Fri</span>
-                            <span className="text-white">9am – 5pm</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-white/60">Sat</span>
-                            <span className="text-white">By Appointment</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
 
@@ -994,6 +916,36 @@ export default function Home() {
               <p className="mt-2 font-body text-base text-[var(--cream-light)]/70">
                 Tell us about your vehicle and what you need
               </p>
+
+              <div className="mt-6 rounded-lg border border-white/20 bg-white/10 p-6 backdrop-blur-xl shadow-2xl">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--burgundy)] text-white shadow-lg">
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="grow">
+                    <div className="flex items-center justify-between gap-4">
+                      <h4 className="font-heading text-lg font-bold text-white">Opening Hours</h4>
+                      <span className="font-body text-[10px] uppercase tracking-widest text-white/40">Verified</span>
+                    </div>
+                    <div className="mt-4 space-y-3 font-body text-sm font-medium">
+                      <div className="flex justify-between border-b border-white/10 pb-2">
+                        <span className="text-white/60">Mon – Thu</span>
+                        <span className="text-white">9am – 6pm</span>
+                      </div>
+                      <div className="flex justify-between border-b border-white/10 pb-2">
+                        <span className="text-white/60">Fri</span>
+                        <span className="text-white">9am – 5pm</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-white/60">Sat</span>
+                        <span className="text-white">By Appointment</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               {formStatus === "success" ? (
                 <div className="mt-8 rounded-lg border border-white/20 bg-white/5 p-12 text-center backdrop-blur-sm animate-fade-in-up">
