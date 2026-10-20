@@ -32,7 +32,7 @@ The main landing page with all sections:
 
 1. **Navigation** (sticky)
    - Logo with "RM" badge on the left
-   - Links: Home, Services, Gallery, Contact
+   - Links: Home, Services, Gallery, About, Contact
    - Mobile hamburger menu
 
 2. **Hero Section**
@@ -41,9 +41,9 @@ The main landing page with all sections:
    - Subheading about Surrey location
    - Two call-to-action buttons
 
-3. **Location Badge**
-   - Floating pill badge below hero
-   - Shows proximity to Goodwood Motor Circuit
+3. **Trust Bar** (`components/TrustBar.tsx`)
+   - Cream strip right under the hero with 4 quick facts: 10+ years, free estimates, 30 min from Goodwood, 5 specialist services
+   - To change a fact, edit the list at the top of `components/TrustBar.tsx`
 
 4. **Services Section** (5 services, directly after the hero)
    - "Free comprehensive estimates provided before work begins" note under the heading
@@ -52,23 +52,30 @@ The main landing page with all sections:
    - Electrical Diagnostics
    - Restorations
    - Motorsport Preparation
-   - Numbered row layout (title / description / photo per row), not cards
+   - Numbered row layout (01–05 label + title / description / photo per row), not cards
 
 5. **Gallery Section** ("Recent Projects", directly after Services)
    - Slightly-off-black background (`--off-black`, not pure black)
    - Continuously looping horizontal photo slider (auto-scrolls, pauses on hover)
    - Link to Instagram
 
-6. **About Section**
+6. **About Section** (linked as "About" in the menu)
    - Company introduction and values
    - Over 10 years experience highlighted
+   - "Get a Free Estimate" button leads to the "Get in Touch" area (call / email buttons)
+
+6b. **What Our Clients Say** – draggable looping testimonial slider
+
+6c. **How It Works** (`components/ProcessSteps.tsx`)
+   - 4 numbered steps: Get in touch → Free estimate → The work → Back on the road
+   - "Book a Free Estimate" button that jumps to the "Get in Touch" area
+   - Sits right above the footer so it leads straight into the call / email buttons
 
 7. **Contact Section**
    - Workshop address in Fernhurst, Haslemere
    - Phone: 07886 877194
    - Email: info@revival-motorworks.co.uk
    - Opening hours
-   - Embedded Google Map
    - Social media links
 
 8. **Footer**
@@ -121,6 +128,21 @@ Edit `app/page.tsx` and search for the contact section (around line 345).
 Replace the Google Maps embed URL in `app/page.tsx` (around line 469) with your actual business location.
 
 ## Recent Changes
+
+- **October 2026** (branch `home-v2`): Removed the em dash from the James Hartley testimonial (now two sentences).
+
+- **October 2026** (branch `home-v2`): Removed the contact form from the footer. The "Get in Touch" area now has the Opening Hours card plus two buttons: **Call 07886 877194** (opens the phone dialler) and **Email Us** (opens the visitor's email app). All "Get a Quote" / "Book a Free Estimate" buttons still jump to this area.
+
+- **October 2026** (branch `home-v2`): Structure & design pass —
+  - Added a **Trust Bar** of 4 quick facts directly under the hero
+  - Added a **How It Works** section (4 steps) just above the contact form
+  - Added **About** to the navigation menu
+  - "View Our Work" in the hero now scrolls to the project photos (was going to Services)
+  - About button now says "Get a Free Estimate" and goes to the contact form (was sending people back up to Services)
+  - Services now show visible 01–05 numbers
+  - Project photos and testimonial cards now fit properly on phone screens
+  - Added a "Get directions" link (Google Maps) under the workshop address in the footer
+  - Swapped "cutting-edge diagnostic tools" for "modern diagnostic equipment" in the About text
 
 - **August 2026** (branch `home-v2`, for client review): "Recent Projects" photo slider now glides smoothly to the next photo when you click the left/right arrows, instead of jumping there instantly. The Opening Hours card in the footer was moved from the left info column to sit right above the contact form, so it's the first thing you see before filling it in.
 - **July 2026** (branch `home-v2`, for client review): "What Our Clients Say" now sits on a white background (was dark charcoal) with light cream cards and burgundy star ratings, matching the rest of the light sections.

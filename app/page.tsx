@@ -5,6 +5,8 @@ import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useLoopSlider } from "@/hooks/useLoopSlider";
+import TrustBar from "@/components/TrustBar";
+import ProcessSteps from "@/components/ProcessSteps";
 
 // Register GSAP plugins
 if (typeof window !== "undefined") {
@@ -70,7 +72,7 @@ const testimonials = [
   {
     name: "James Hartley",
     vehicle: "1967 Jaguar E-Type",
-    quote: "Revival brought my E-Type back to its former glory. Their attention to detail is remarkable—every nut and bolt was treated with care."
+    quote: "Revival brought my E-Type back to its former glory. Their attention to detail is remarkable. Every nut and bolt was treated with care."
   },
   {
     name: "Sarah Mitchell",
@@ -92,34 +94,6 @@ export default function Home() {
   const [navVisible, setNavVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [formStatus, setFormStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
-
-  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setFormStatus("submitting");
-
-    const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData.entries());
-
-    try {
-      const response = await fetch("https://formspree.io/info@revival-motorworks.co.uk", {
-        method: "POST",
-        body: formData,
-        headers: {
-          Accept: "application/json",
-        },
-      });
-
-      if (response.ok) {
-        setFormStatus("success");
-      } else {
-        setFormStatus("error");
-      }
-    } catch (err) {
-      setFormStatus("error");
-    }
-  };
-
   // Refs for GSAP animations
   const heroHeadingRef = useRef<HTMLHeadingElement>(null);
   const heroSubtextRef = useRef<HTMLParagraphElement>(null);
@@ -356,7 +330,7 @@ export default function Home() {
           <div className="grid h-20 grid-cols-2 items-center md:grid-cols-3">
             {/* Quick Links - Left */}
             <div className="hidden items-center gap-8 md:flex">
-              {["Home", "Services", "Gallery"].map((item) => (
+              {["Home", "Services", "Gallery", "About"].map((item) => (
                 <a
                   key={item}
                   href={`#${item.toLowerCase()}`}
@@ -397,6 +371,7 @@ export default function Home() {
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="flex h-10 w-10 items-center justify-center rounded-md md:hidden"
                 aria-label="Toggle menu"
+                aria-expanded={mobileMenuOpen}
               >
                 <div className="space-y-1.5">
                   <span
@@ -422,7 +397,7 @@ export default function Home() {
               }`}
           >
             <div className={`flex flex-col gap-6 rounded-lg p-6 pt-6 ${scrolled ? "" : "bg-black/40 backdrop-blur-md"}`}>
-              {["Home", "Services", "Gallery"].map((item) => (
+              {["Home", "Services", "Gallery", "About"].map((item) => (
                 <a
                   key={item}
                   href={`#${item.toLowerCase()}`}
@@ -503,7 +478,7 @@ export default function Home() {
                 Get a Quote
               </a>
               <a
-                href="#services"
+                href="#gallery"
                 className="group inline-flex items-center gap-2 font-ui text-sm font-semibold uppercase tracking-wider text-white transition-all hover:text-[var(--cream)]"
               >
                 View Our Work
@@ -542,6 +517,8 @@ export default function Home() {
         </div>
       </section>
 
+      <TrustBar />
+
       {/* Services Section */}
       <section
         id="services"
@@ -568,9 +545,14 @@ export default function Home() {
                 className="border-t border-[var(--charcoal)]/15 py-10"
               >
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-start lg:gap-10">
-                  <h3 className="font-heading text-2xl font-bold leading-tight text-[var(--charcoal)] sm:text-3xl lg:col-span-4">
-                    {service.title}
-                  </h3>
+                  <div className="lg:col-span-4">
+                    <span className="font-ui text-sm font-semibold tracking-wider text-[var(--burgundy)]">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <h3 className="mt-3 font-heading text-2xl font-bold leading-tight text-[var(--charcoal)] sm:text-3xl">
+                      {service.title}
+                    </h3>
+                  </div>
                   <p className="font-body text-base leading-relaxed text-[var(--grey-medium)] lg:col-span-4">
                     {service.description}
                   </p>
@@ -643,7 +625,7 @@ export default function Home() {
           {[...galleryImages, ...galleryImages].map((image, index) => (
             <div
               key={index}
-              className="group relative aspect-square h-[32rem] w-[32rem] shrink-0 overflow-hidden rounded-lg shadow-lg sm:h-[40rem] sm:w-[40rem]"
+              className="group relative aspect-square w-[85vw] max-w-[32rem] shrink-0 sm:max-w-none sm:w-[40rem] overflow-hidden rounded-lg shadow-lg"
             >
               <Image
                 src={image}
@@ -684,7 +666,7 @@ export default function Home() {
       </section>
 
       {/* About Section */}
-      <section className="relative overflow-hidden bg-white py-28">
+      <section id="about" className="relative scroll-mt-20 overflow-hidden bg-white py-28">
         <div className="grid grid-cols-1 lg:grid-cols-2 lg:items-center">
           {/* Left Column - Image (full-bleed to screen edge) */}
           <div className="relative aspect-[4/3] overflow-hidden rounded-none shadow-xl lg:aspect-auto lg:h-[600px] lg:rounded-r-2xl">
@@ -714,17 +696,17 @@ export default function Home() {
               border, specialising in classic, vintage, and modern vehicle care.
               With over 10 years of experience and a genuine passion for
               automotive excellence, we combine time-honoured craftsmanship with
-              cutting-edge diagnostic tools. Whether you&apos;re a classic car
+              modern diagnostic equipment. Whether you&apos;re a classic car
               enthusiast or an everyday driver, we deliver reliable, high-quality
               solutions with meticulous attention to detail.
             </p>
 
             <div className="mt-10">
               <a
-                href="#services"
+                href="#contact"
                 className="btn-primary inline-flex items-center rounded-[6px] px-8 py-4 font-ui text-sm font-semibold uppercase tracking-wider"
               >
-                Explore Our Services
+                Get a Free Estimate
               </a>
             </div>
           </div>
@@ -756,7 +738,7 @@ export default function Home() {
           {[...testimonials, ...testimonials].map((testimonial, index) => (
             <div
               key={index}
-              className="flex h-[26rem] w-[22rem] shrink-0 flex-col rounded-lg border border-[var(--charcoal)]/10 bg-[var(--cream-light)] p-10 shadow-sm transition-colors hover:border-[var(--burgundy)]/30 sm:h-[28rem] sm:w-[26rem] sm:p-12 md:w-[30rem]"
+              className="flex min-h-[22rem] w-[85vw] max-w-[22rem] shrink-0 flex-col sm:h-[28rem] sm:max-w-none rounded-lg border border-[var(--charcoal)]/10 bg-[var(--cream-light)] p-10 shadow-sm transition-colors hover:border-[var(--burgundy)]/30 sm:w-[26rem] sm:p-12 md:w-[30rem]"
             >
               <div className="flex gap-1 text-[var(--burgundy)]">
                 {[...Array(5)].map((_, i) => (
@@ -807,6 +789,7 @@ export default function Home() {
         </div>
       </section>
 
+      <ProcessSteps />
 
       {/* Footer */}
       <footer className="relative overflow-hidden bg-[var(--charcoal)] px-4 py-16">
@@ -882,6 +865,14 @@ export default function Home() {
                     Fernhurst, Haslemere<br />
                     Surrey GU27 3JG
                   </address>
+                  <a
+                    href="https://www.google.com/maps/search/?api=1&query=Hurstfold+Industrial+Estate+Fernhurst+GU27+3JG"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 inline-flex items-center gap-1 font-ui text-xs font-semibold uppercase tracking-wider text-[var(--cream)] underline underline-offset-4 transition-colors hover:text-white"
+                  >
+                    Get directions
+                  </a>
 
                   <div className="mt-4 space-y-1">
                     <p className="font-body text-sm text-[var(--cream-light)]/70">
@@ -914,7 +905,7 @@ export default function Home() {
                 </h3>
               </div>
               <p className="mt-2 font-body text-base text-[var(--cream-light)]/70">
-                Tell us about your vehicle and what you need
+                Give us a call or drop us an email about your vehicle
               </p>
 
               <div className="mt-6 rounded-lg border border-white/20 bg-white/10 p-6 backdrop-blur-xl shadow-2xl">
@@ -947,79 +938,20 @@ export default function Home() {
                 </div>
               </div>
 
-              {formStatus === "success" ? (
-                <div className="mt-8 rounded-lg border border-white/20 bg-white/5 p-12 text-center backdrop-blur-sm animate-fade-in-up">
-                  <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[var(--burgundy)] text-white shadow-lg">
-                    <svg className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <h4 className="mt-8 font-heading text-2xl font-bold text-white">Message Sent!</h4>
-                  <p className="mt-4 font-body text-[var(--cream-light)]/70">
-                    Thank you for contacting Revival Motorworks. We&apos;ll be in touch regarding your vehicle shortly.
-                  </p>
-                  <button
-                    onClick={() => setFormStatus("idle")}
-                    className="mt-10 font-ui text-xs font-bold uppercase tracking-widest text-[var(--cream)] underline underline-offset-8 transition-colors hover:text-white"
-                  >
-                    Send another message
-                  </button>
-                </div>
-              ) : (
-                <form onSubmit={handleFormSubmit} className="mt-8 space-y-4">
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <input
-                      required
-                      name="name"
-                      type="text"
-                      placeholder="Your Name"
-                      className="w-full rounded-[6px] border border-[var(--cream-light)]/20 bg-white/5 px-4 py-3 font-body text-[var(--cream-light)] placeholder:text-[var(--cream-light)]/40 focus:border-[var(--burgundy)] focus:outline-none focus:ring-1 focus:ring-[var(--burgundy)]"
-                    />
-                    <input
-                      required
-                      name="email"
-                      type="email"
-                      placeholder="Your Email"
-                      className="w-full rounded-[6px] border border-[var(--cream-light)]/20 bg-white/5 px-4 py-3 font-body text-[var(--cream-light)] placeholder:text-[var(--cream-light)]/40 focus:border-[var(--burgundy)] focus:outline-none focus:ring-1 focus:ring-[var(--burgundy)]"
-                    />
-                  </div>
-                  <input
-                    name="phone"
-                    type="tel"
-                    placeholder="Your Phone (optional)"
-                    className="w-full rounded-[6px] border border-[var(--cream-light)]/20 bg-white/5 px-4 py-3 font-body text-[var(--cream-light)] placeholder:text-[var(--cream-light)]/40 focus:border-[var(--burgundy)] focus:outline-none focus:ring-1 focus:ring-[var(--burgundy)]"
-                  />
-                  <textarea
-                    required
-                    name="message"
-                    placeholder="Tell us about your vehicle and what you need..."
-                    rows={4}
-                    className="w-full resize-none rounded-[6px] border border-[var(--cream-light)]/20 bg-white/5 px-4 py-3 font-body text-[var(--cream-light)] placeholder:text-[var(--cream-light)]/40 focus:border-[var(--burgundy)] focus:outline-none focus:ring-1 focus:ring-[var(--burgundy)]"
-                  />
-                  <button
-                    disabled={formStatus === "submitting"}
-                    type="submit"
-                    className="btn-primary w-full rounded-[6px] px-6 py-4 font-ui text-sm font-semibold uppercase tracking-wider transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {formStatus === "submitting" ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                        </svg>
-                        Sending...
-                      </span>
-                    ) : (
-                      "Send Message"
-                    )}
-                  </button>
-                  {formStatus === "error" && (
-                    <p className="mt-4 text-center font-body text-sm text-red-400">
-                      Something went wrong. Please try again or email us directly.
-                    </p>
-                  )}
-                </form>
-              )}
+              <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <a
+                  href="tel:07886877194"
+                  className="btn-primary inline-flex items-center justify-center gap-2 rounded-[6px] px-6 py-4 font-ui text-sm font-semibold uppercase tracking-wider"
+                >
+                  Call 07886 877194
+                </a>
+                <a
+                  href="mailto:info@revival-motorworks.co.uk"
+                  className="inline-flex items-center justify-center gap-2 rounded-[6px] border border-white/40 px-6 py-4 font-ui text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-white/10"
+                >
+                  Email Us
+                </a>
+              </div>
 
               <p className="mt-12 text-center font-body text-sm text-[var(--cream-light)]/50 lg:hidden">
                 &copy; 2026 Revival Motorworks. All rights reserved.
