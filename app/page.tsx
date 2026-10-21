@@ -16,7 +16,7 @@ if (typeof window !== "undefined") {
 // Hero background images for rotation
 const heroImages = [
   "/projects/hero-mg.jpeg",
-  "/projects/hero-2.jpeg",
+  "/projects/hero-alfa.jpeg",
   "/projects/hero-3.jpeg",
   "/projects/hero4.jpeg",
   "/projects/hero-image-5.jpeg",
@@ -27,7 +27,7 @@ const services = [
   {
     title: "Servicing & Repairs",
     description: "Comprehensive maintenance for classic and modern vehicles—from suspension and drivetrain work to annual services.",
-    image: "/projects/brake-repair.jpeg",
+    image: "/projects/rear-subframe.jpeg",
   },
   {
     title: "Welding & Fabrication",

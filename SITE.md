@@ -135,6 +135,8 @@ Replace the Google Maps embed URL in `app/page.tsx` (around line 469) with your 
 
 ## Recent Changes
 
+- **21 October 2026**: Swapped the "Servicing & Repairs" photo for a shot of a freshly painted rear subframe being rebuilt in the workshop (`public/projects/rear-subframe.jpeg`).
+
 - **21 October 2026**: Connected the site to a new Vercel project so it goes live automatically from GitHub. Tested it by making the hero heading red, then changed it back to white. All `home-v2` work is now live on `main`.
 
 - **October 2026** (branch `home-v2`): Removed the em dash from the James Hartley testimonial (now two sentences).
@@ -152,6 +154,7 @@ Replace the Google Maps embed URL in `app/page.tsx` (around line 469) with your 
   - Added a "Get directions" link (Google Maps) under the workshop address in the footer
   - Swapped "cutting-edge diagnostic tools" for "modern diagnostic equipment" in the About text
 
+- **October 2026** (branch `home-v2`): Swapped the blue Morris Minor photo in the rotating hero background for a red Alfa Romeo Giulietta Sprint (file: `public/projects/hero-alfa.jpeg`).
 - **August 2026** (branch `home-v2`, for client review): "Recent Projects" photo slider now glides smoothly to the next photo when you click the left/right arrows, instead of jumping there instantly. The Opening Hours card in the footer was moved from the left info column to sit right above the contact form, so it's the first thing you see before filling it in.
 - **July 2026** (branch `home-v2`, for client review): "What Our Clients Say" now sits on a white background (was dark charcoal) with light cream cards and burgundy star ratings, matching the rest of the light sections.
 - **July 2026** (branch `home-v2`, for client review): Footer now has a heavily blurred, darkened workshop photo behind it instead of a flat background color, for a warmer feel.
