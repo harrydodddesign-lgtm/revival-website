@@ -109,6 +109,12 @@ The main landing page with all sections:
 - Placeholder images from Unsplash (to be replaced with actual photos)
 - Google Maps embed for location
 
+### Hosting (where the site lives online)
+- **Live site:** https://revival-website-seji.vercel.app
+- The code is stored on GitHub at `harrydodddesign-lgtm/revival-website`, and Vercel (the hosting service) is connected to it.
+- Anything added to the `main` version on GitHub goes live automatically within about a minute.
+- Other versions (like `home-v2`) get their own private preview link in Vercel, so changes can be checked before going live.
+
 ## How to Customize
 
 ### To change the brand colors:
@@ -128,6 +134,8 @@ Edit `app/page.tsx` and search for the contact section (around line 345).
 Replace the Google Maps embed URL in `app/page.tsx` (around line 469) with your actual business location.
 
 ## Recent Changes
+
+- **21 October 2026**: Connected the site to a new Vercel project so it goes live automatically from GitHub. Tested it by making the hero heading red, then changed it back to white. All `home-v2` work is now live on `main`.
 
 - **October 2026** (branch `home-v2`): Removed the em dash from the James Hartley testimonial (now two sentences).
 
