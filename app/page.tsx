@@ -454,7 +454,7 @@ export default function Home() {
             <div className="overflow-hidden">
               <h1
                 ref={heroHeadingRef}
-                className="mx-auto pb-2 font-heading text-4xl font-bold leading-[1.1] text-white sm:text-5xl md:text-6xl lg:text-8xl max-w-4xl"
+                className="mx-auto pb-2 font-heading text-4xl font-bold leading-[1.1] text-red-600 sm:text-5xl md:text-6xl lg:text-8xl max-w-4xl"
               >
                 Classic & Vintage Specialists.
               </h1>
